@@ -1,0 +1,1797 @@
+#+BEGIN: clocktable :maxlevel 2 :scope file
+#+CAPTION: Clock summary at [2016-03-02 Wed 09:10]
+| Headline                                     |    Time |      |
+|----------------------------------------------+---------+------|
+| *Total time*                                 | *15:10* |      |
+|----------------------------------------------+---------+------|
+| Post-GA                                      |    0:22 |      |
+| \emsp DONE Add Jianzhong to project start... |         | 0:22 |
+| MISRA                                        |    0:57 |      |
+| \emsp atan2sp_66                             |         | 0:09 |
+| \emsp Non-kernel fixes                       |         | 0:47 |
+| TODO Klocwork Issues :: mathlib_3.1.2        |   13:51 |      |
+| \emsp DONE Initial Data                      |         | 0:32 |
+| \emsp TODO kernel :: atan2sp                 |         | 8:21 |
+| \emsp TODO kernel :: common                  |         | 1:43 |
+| \emsp TODO Build Script                      |         | 2:49 |
+#+END:
+
+* Python
+** functions
+#+begin_src ipython :session :exports both
+import csv
+import pprint
+import re
+
+# CONFIG #####
+kw_spec_file = "C:/mathlib_3.1.2/res/klocwork_tbl_meta.txt"
+kw_waiver_file = "C:/mathlib_3.1.2/res/VLIB_MisraC_Policy.csv"
+kw_issues_file = "C:/mathlib_3.1.2/res/mathlib_issues.txt"
+
+#kw_spec_file = "C:/MISRA/klocwork_tbl_meta.txt"
+#kw_waiver_file = "C:/MISRA/VLIB_MisraC_Policy.csv"
+#kw_issues_file = "C:/MISRA/mathlib_issues.txt"
+
+##############
+
+pp = pprint.PrettyPrinter(indent=2)
+
+def read_spec_table():
+    tbl = {}
+    with open(kw_spec_file) as csvfile:
+        reader = csv.reader(csvfile, delimiter='|')
+        for row in reader:
+            tbl[row[0]] = row[2]
+
+    return tbl
+
+def read_waiver_table():    
+    waivers = {}
+    with open(kw_waiver_file) as csvfile:
+        reader = csv.reader(csvfile, delimiter=',')
+        for row in reader:
+            waivers[row[1]] = row[4]
+            
+    return waivers
+
+def build_issue_table(waviers, specs):
+    issues = {}
+    with open(kw_issues_file) as csvfile:
+        reader = csv.reader(csvfile, delimiter=':')
+        for row in reader:
+            if row[0] not in issues:
+                issues[row[0]] = {}
+                
+                if row[0] in specs:
+                    issues[row[0]]['rule_no'] = specs[row[0]]
+                else:
+                    issues[row[0]]['rule_no'] = "n/a"
+                    
+                if row[0] in waivers:
+                    issues[row[0]]['waiver'] = waivers[row[0]]
+                else:
+                    issues[row[0]]['waiver'] = "none"
+                    
+                issues[row[0]]['issue_code'] = row[0]
+                issues[row[0]]['total'] = 0
+                issues[row[0]]['num_files'] = 0
+                issues[row[0]]['num_kernels'] = 0
+                issues[row[0]]['description'] = row[1]
+                issues[row[0]]['severity'] = row[4]
+                issues[row[0]]['files'] = {}
+                issues[row[0]]['kernels'] = {}
+                
+                issues[row[0]]['total'] += 1
+                
+            if row[3] not in issues[row[0]]['files']:
+                issues[row[0]]['files'][row[3]] = 0
+                issues[row[0]]['num_files'] += 1
+
+            issues[row[0]]['files'][row[3]] += 1
+            
+            kernel_name = re.match("([^_\.]*)",row[3]).group(0)
+            
+            if kernel_name not in issues[row[0]]['kernels']:
+                issues[row[0]]['kernels'][kernel_name] = 0
+                issues[row[0]]['num_kernels'] += 1
+                
+            issues[row[0]]['kernels'][kernel_name] += 1
+    
+    return issues
+
+def generate_psv(filename):
+    with open(filename,'w') as f:
+        for key,value in issues.iteritems():
+            outarr = [value['rule_no'],
+                      value['issue_code'],
+                      value['description'],
+                      str(value['total']),
+                      ",".join(value['kernels']),
+                      str(value['num_kernels']),
+                      ",".join(value['files']),
+                      str(value['num_files']),
+                      value['severity'],
+                      value['waiver']
+            ]
+
+        f.write("|".join(outarr))
+        f.write('\n')
+
+def kernel_info():
+    kernels = {}
+    with open(kw_issues_file) as csvfile:
+        reader = csv.reader(csvfile, delimiter=':')
+        for row in reader:
+            kernel_name = re.match("([^_\.]*)",row[3]).group(0).strip()
+            
+            if kernel_name not in kernels:
+                kernels[kernel_name] = {}
+                kernels[kernel_name]['name'] = kernel_name
+                kernels[kernel_name]['total'] = 0
+                kernels[kernel_name]['unique'] = 0
+                kernels[kernel_name]['issues'] = {}
+            
+            kernels[kernel_name]['total'] += 1
+            
+            if row[0] not in kernels[kernel_name]['issues']:
+                kernels[kernel_name]['issues'][row[0]] = 0
+                kernels[kernel_name]['unique'] += 1
+                
+            kernels[kernel_name]['issues'][row[0]] += 1
+            
+        return kernels
+
+def kernel_list(kinfo):
+    outlist = []
+    for entry in kinfo:
+        e = kinfo[entry]
+        outlist.append([e['name'], e['total'], e['unique']])
+    return outlist
+
+
+#+end_src
+
+#+RESULTS:
+
+** scratch
+#+begin_src ipython :session :exports both
+d = kernel_info()
+l = kernel_list(d)
+
+s = sorted(l, key=lambda x: x[2])
+
+for e in s:
+    print e[0],
+    print '\t', e[1], '\t', e[2]
+    #print d[e[0]]['issues'].keys()
+    
+#+end_src
+
+#+RESULTS:
+
+#+begin_src ipython :session :exports both
+specs = read_spec_table()
+waivers = read_waiver_table()
+issues = build_issue_table(waivers,specs)
+
+pp.pprint(issues)
+#+end_src
+
+#+RESULTS:
+
+** Org-parse
+#+begin_src ipython :session :exports both
+import sys
+
+class OrgNode:
+    """Org-Mode node is a header and all contents under that header """
+    
+    def __init__(self,title,task,parent,level):
+        self._title = title
+        self._children = []
+        self._parent = parent
+        self._data = []
+        self._level = level
+        self._drawer = None
+        
+    def title(self):
+        return self._title
+        
+    def children(self):
+        return self._children
+
+    def parent(self):
+        return self._parent
+
+    def data(self):
+        return self._data
+
+    def level(self):
+        return self._level
+
+    def drawer(self):
+        return self._drawer
+
+    def display(self):
+        for i in range(self._level):
+            sys.stdout.write('*')
+        print self._title
+        for c in self._children:
+            c.display()
+            
+    def birth(self, title, task, level):
+        baby = OrgNode(title, task, self, level)
+        self._children.append(baby)
+        return baby
+
+    def find(self, title):
+        if title == self._title:
+            return self
+
+        for child in self._children:
+            out = child.find(title)
+            if out is not None:
+                return out
+
+        return None
+
+    def datize(self, data):
+        self._data.append(data)
+
+    def add_drawer(self, drawer):
+        self._drawer = drawer
+        
+class OrgTree:
+    """Full Org-Mode tree """
+
+    def __init__(self):
+        self.root = OrgNode("TREE",None,None,0)
+
+    def parse_file(self,filename):
+        curr = self.root
+        
+        with open(filename) as orgfile:
+            dflag = False
+            drawer = []
+            
+            for line in orgfile:
+                mat = re.match("^(\*+) (TODO|DONE|NEXT|WAITING|HOLD)?\s?(.*)$",line)
+                if mat:	# its a header
+                    stars = mat.group(1)
+                    level = len(stars)
+                    task  = mat.group(2)
+                    title = mat.group(3)
+
+                    if dflag:
+                        for draw in drawer:
+                            curr.datize(draw)
+                            
+                        drawer = []
+                        dflag = False
+                    
+                    while level <= curr.level():
+                        curr = curr.parent()
+                    
+                    curr = curr.birth(title, task, level)
+        
+                else:	# its a body
+                    if line.strip() == ":LOGBOOK:":
+                        drawer.append(line)
+                        dflag = True
+
+                    else:
+                        if dflag == True:
+                            drawer.append(line)
+                            if line.strip() == ":END:":
+                                curr.add_drawer(drawer)
+                                dflag = False
+                                drawer = []
+                        else:
+                            curr.datize(line)
+        
+        
+    def display(self):
+        self.root.display()
+
+    def find(self, title):
+        return self.root.find(title)
+#+end_src
+
+#+RESULTS:
+
+** NEXT Unify all MISRA data
+#+begin_src ipython :session :exports both
+import re
+
+mathlib_org_file = "C:/Users/a0226847/Documents/mathlib 3.2.0/worklog.org"
+
+tree = OrgTree()
+tree.parse_file(mathlib_org_file)
+#tree.display()
+notes = tree.find("Klocwork Issues :: mathlib_3.1.2")
+
+for d in notes.children():
+    mat = re.match("kernel :: ([a-zA-Z]*)",d.title())
+    if mat:
+        print len(d.children())
+
+#+end_src
+
+#+RESULTS:
+
+#+begin_src ipython :session :exports both
+import re
+
+fn = "C:/Users/a0226847/Desktop/test.htm"
+
+f = open(fn)
+for line in f:
+    print line[0:100]
+f.close()
+#+end_src
+
+#+RESULTS:
+
+* Post-GA
+** Project Start Approval record
+[2016-02-23 Tue]
+*** Project MGMT : Naga
+*** DONE System Test
+** DONE Setup briefing meeting
+SCHEDULED: <2016-02-25 Thu>
+** DONE Add Jianzhong to project start stuff
+SCHEDULED: <2016-02-26 Fri>
+:LOGBOOK:  
+CLOCK: [2016-02-26 Fri 14:07]--[2016-02-26 Fri 14:29] =>  0:22
+:END:      
+
+** Release
+DEADLINE: <2016-03-31 Thu>
+
+
+** TODO Profile with 8.1 compiler
+
+* TODO SRAS
+* MISRA
+:LOGBOOK:  
+CLOCK: [2016-02-25 Thu 14:37]--[2016-02-25 Thu 14:38] =>  0:01
+:END:      
+
+** To Do
+*** TODO figure out how to build single kernel
+** scripts 
+#+begin_src ipython :session :exports both
+d = kernel_info()
+l = kernel_list(d)
+
+s = sorted(l, key=lambda x: x[2])
+
+for e in s:
+    print e[0],
+    if len(e[0]) < 7: print '\t',
+    print '\t', e[1], '\t', e[2]
+
+    #for i in d[e[0]]['issues'].keys():
+        #print '\t',i
+    
+#+end_src
+
+#+RESULTS:
+
+** atan2sp_66
+CLOCK: [2016-02-24 Wed 11:53]--[2016-02-24 Wed 12:02] =>  0:09
+
+
+Tied for the highest number of unique issues (16), but of them has the
+least number of total issues (40)
+
+- version :: c66_BE_ELF
+*** Initial benchmark
+- RTS    :: 352
+- ASM    :: 105
+- C      :: 105
+- Inline :: 86
+- Vector :: 24
+
+*** Issues
+2522
+2490
+**** Files
+- stdlib.h
+- stdio.h
+- mathl.h
+- mathf.h
+- math.h
+- drvsp.h
+- driver.h
+- common.h
+- c6x.h
+- atan2sp_v.c
+- atan2sp.h
+- atan2sp.c
+
+**** atan2sp Errors
+***** MISRA.BUILTIN_NUMERIC
+***** MISRA.ZERO_EQ.IMPLICIT
+:header:good:fixed:
+- fix :: explicitly compare variable to zero/false
+***** MISRA.PPARAM.NEEDS.CONST
+:vector:good:fixed:
+- fix :: add 'const' keyword
+****** TODO Test if affects application code
+***** MISRA.FLOAT_EQUAL
+:inline:good/bad:pending:
+- fix :: epsilon?
+***** MISRA.EXPR.PARENS.REDUNDANT
+:inline:driver:good:fixed:
+- fix :: remove extra parens
+***** MISRA.RETURN.NOT_LAST
+:inline:good:waive:
+- fix :: add return statement
+***** MISRA.ONEDEFRULE.FUNC
+:inline:good/bad:pending:
+- fix :: remove from header NOT REALLY POSSIBLE
+***** MISRA.TOKEN.CPCOM
+:inline:driver:good:fixed:
+-fix :: change comment style to /* */
+***** MISRA.BITS.NOT_UNSIGNED
+:inline:good/bad:
+- fix :: add 'unsigned' keyword to parameters s, bn
+****** TODO Test if affects application code
+***** MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** MISRA.FUNC.NOPROT.CALL
+:vector:inline:header:driver:c:good/bad:
+- fix :: add function prototypes (in header?)
+***** MISRA.EXPR.PARENS.INSUFFICIENT
+:inline:good:
+- fix :: add parens around multiplicands
+***** MISRA.FUNC.NOPROT.DEF
+:inline:c:good/bad:
+- fix :: add function prototype
+***** MISRA.LOGIC.OPERAND.NOT_BOOL
+:inline:good/bad:
+- fix :: compare explicitly with zero
+***** MISRA.CVALUE.IMPL.CAST
+:inline:driver:good/bad:
+- fix :: add .0 or .0f to constant comparison
+***** MISRA.LOGIC.OPERATOR.NOT_BOOL
+:inline:good/bad:
+***** MISRA.PTR.ARITH
+
+** Non-kernel fixes
+CLOCK: [2016-02-25 Thu 09:14]--[2016-02-25 Thu 10:01] =>  0:47
+
+#+begin_src ipython :session :exports both :results output
+d = kernel_info()
+l = kernel_list(d)
+
+s = sorted(l, key=lambda x: x[2])
+
+for e in s:
+    if "sp" not in e[0] and "dp" not in e[0]:
+        print e[0],
+        if len(e[0]) < 7: print '\t',
+        print '\t', e[1], '\t', e[2]
+        
+        for i in d[e[0]]['issues'].keys():
+            print '\t',i
+      
+#+end_src
+
+#+RESULTS:
+#+begin_example
+ tables 	20 	1
+	MISRA.TOKEN.CPCOM
+ stdint 	13 	2
+	MISRA.DEFINE.WRONGNAME.UNDERSCORE
+	MISRA.DEFINE.FUNC
+ float 		36 	3
+	MISRA.DEFINE.WRONGNAME.UNDERSCORE
+	MISRA.DEFINE.BADEXP
+	MISRA.DEFINE.WRONGNAME
+ common 	23 	7
+	MISRA.ONEDEFRULE.FUNC
+	MISRA.BUILTIN_NUMERIC
+	MISRA.DEFINE.FUNC
+	MISRA.DEFINE.WRONGNAME.UNDERSCORE
+	MISRA.DECL.ARRAY_SIZE
+	MISRA.EXPR.PARENS.INSUFFICIENT
+	MISRA.FUNC.NOPROT.DEF
+ vect 		40 	7
+	MISRA.DEFINE.FUNC
+	MISRA.DEFINE.WRONGNAME.UNDERSCORE
+	MISRA.DEFINE.SHARP
+	MISRA.DEFINE.BADEXP
+	MISRA.STDLIB.WRONGNAME.UNDERSCORE
+	MISRA.DEFINE.SHARP.MANY
+	MISRA.DEFINE.NOPARS
+ c6x 		1051 	9
+	MISRA.BUILTIN_NUMERIC
+	MISRA.INCGUARD
+	MISRA.FUNC.NO_PARAMS
+	MISRA.DEFINE.WRONGNAME.UNDERSCORE
+	MISRA.DEFINE.FUNC
+	MISRA.DEFINE.BADEXP
+	MISRA.STDLIB.WRONGNAME.UNDERSCORE
+	MISRA.FUNC.UNNAMED.PARAMS
+	MISRA.DEFINE.NOPARS
+#+end_example
+
+* TODO Klocwork Issues :: mathlib_3.1.2
+:LOGBOOK:  
+CLOCK: [2016-03-08 Tue 09:53]--[2016-03-08 Tue 09:57] =>  0:04
+CLOCK: [2016-03-07 Mon 15:01]--[2016-03-07 Mon 15:09] =>  0:08
+CLOCK: [2016-03-07 Mon 10:53]--[2016-03-07 Mon 11:21] =>  0:28
+CLOCK: [2016-03-07 Mon 09:45]--[2016-03-07 Mon 09:57] =>  0:12
+CLOCK: [2016-03-02 Wed 09:10]--[2016-03-02 Wed 11:31] =>  2:21
+CLOCK: [2016-02-29 Mon 09:27]--[2016-02-29 Mon 09:36] =>  0:09
+CLOCK: [2016-02-26 Fri 11:29]--[2016-02-26 Fri 11:30] =>  0:01
+CLOCK: [2016-02-26 Fri 09:45]--[2016-02-26 Fri 09:56] =>  0:11
+CLOCK: [2016-02-25 Thu 15:22]--[2016-02-25 Thu 15:23] =>  0:01
+CLOCK: [2016-02-25 Thu 14:46]--[2016-02-25 Thu 14:50] =>  0:04
+:END:      
+kwshell -pd C:\Users\a0226847\klocwork_projects\mathlib_3.2.0\.kwlp
+** DONE Initial Data
+:LOGBOOK:  
+CLOCK: [2016-02-25 Thu 14:50]--[2016-02-25 Thu 15:22] =>  0:32
+:END:      
+Working set: C66_all
+
+Total Errors: 4984
+Non-kernel Errors: 112
+
+*** Issues names
+#+begin_src ipython :session :exports both :results output
+specs = read_spec_table()
+waivers = read_waiver_table()
+issues = build_issue_table(waivers,specs)
+
+for k in issues.keys(): print k
+#+end_src
+
+#+RESULTS:
+#+begin_example
+MISRA.LOGIC.PRIMARY
+MISRA.EXPR.PARENS.REDUNDANT
+MISRA.RETURN.NOT_LAST
+MISRA.BITS.NOT_UNSIGNED
+MISRA.FUNC.NO_PARAMS
+MISRA.EXPR.PARENS.INSUFFICIENT
+MISRA.FUNC.NOPROT.DEF
+MISRA.STDLIB.WRONGNAME
+MISRA.DEFINE.NOPARS
+MISRA.INCL.INSIDE
+MISRA.CAST.INT
+MISRA.ONEDEFRULE.FUNC
+MISRA.DECL.ARRAY_SIZE
+MISRA.DEFINE.SHARP.MANY
+MISRA.DEFINE.BADEXP
+MISRA.DEFINE.SHARP
+MISRA.LOGIC.OPERAND.NOT_BOOL
+MISRA.STDLIB.WRONGNAME.UNDERSCORE
+MISRA.LITERAL.UNSIGNED.SUFFIX
+MISRA.PPARAM.NEEDS.CONST
+MISRA.PRAGMA
+MISRA.DEFINE.FUNC
+MISRA.ZERO_EQ.IMPLICIT
+MISRA.DEFINE.WRONGNAME.UNDERSCORE
+INVARIANT_CONDITION.UNREACH
+MISRA.FUNC.NOPROT.CALL
+MISRA.CVALUE.IMPL.CAST
+MISRA.FUNC.UNNAMED.PARAMS
+MISRA.PTR.ARITH
+MISRA.FLOAT_EQUAL
+MISRA.DEFINE.WRONGNAME
+MISRA.TOKEN.CPCOM
+MISRA.BUILTIN_NUMERIC
+MISRA.INCGUARD
+MISRA.LOGIC.OPERATOR.NOT_BOOL
+UNREACH.GEN
+MISRA.NULL.STMT
+MISRA.IF.NO_ELSE
+MISRA.CAST.FLOAT
+#+end_example
+
+*** All issue information
+#+begin_src ipython :session :exports both
+specs = read_spec_table()
+waivers = read_waiver_table()
+issues = build_issue_table(waivers,specs)
+
+pp.pprint(issues)
+#+end_src
+
+#+RESULTS:
+
+*** Kernels sorted by issues
+#+begin_src ipython :session :exports both
+d = kernel_info()
+l = kernel_list(d)
+
+s = sorted(l, key=lambda x: x[2])
+
+print "NAME",'\t','\t',"TOTAL",'\t',"UNIQUE"
+
+for e in s:
+    print e[0],
+    if len(e[0]) < 7: print '\t',
+    print '\t', e[1], '\t', e[2]
+
+    #for i in d[e[0]]['issues'].keys():
+        #print '\t',i
+    
+#+end_src
+
+#+RESULTS:
+
+*** Generate list
+#+begin_src ipython :session :exports both
+d = kernel_info()
+l = kernel_list(d)
+
+s = sorted(l, key=lambda x: x[2], reverse=True)
+
+print "** TODO Kernels"
+
+for e in s:
+    print "*** TODO", e[0]
+    print "**** Klocwork Issues"
+    for k in sorted(d[e[0]]['issues'].keys()):
+        print "***** TODO", k
+    print "**** General Issues"
+    print "**** Doc"
+#+end_src
+
+#+RESULTS:
+
+** TODO Kernels
+*** TODO atan2sp
+**** Klocwork Issues
+***** DONE MISRA.BITS.NOT_UNSIGNED
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.EXPR.PARENS.REDUNDANT
+***** TODO MISRA.FLOAT_EQUAL
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.LOGIC.OPERAND.NOT_BOOL
+***** TODO MISRA.LOGIC.OPERATOR.NOT_BOOL
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.RETURN.NOT_LAST
+***** TODO MISRA.TOKEN.CPCOM
+***** TODO MISRA.ZERO_EQ.IMPLICIT
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO powsp
+**** Klocwork Issues
+***** TODO MISRA.BITS.NOT_UNSIGNED
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.CAST.FLOAT
+***** TODO MISRA.CAST.INT
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.EXPR.PARENS.REDUNDANT
+***** TODO MISRA.FLOAT_EQUAL
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.LOGIC.OPERATOR.NOT_BOOL
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.ZERO_EQ.IMPLICIT
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO powdp
+**** Klocwork Issues
+***** TODO MISRA.BITS.NOT_UNSIGNED
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.EXPR.PARENS.REDUNDANT
+***** TODO MISRA.FLOAT_EQUAL
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.RETURN.NOT_LAST
+***** TODO MISRA.STDLIB.WRONGNAME
+***** TODO MISRA.ZERO_EQ.IMPLICIT
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO asindp
+**** Klocwork Issues
+***** TODO INVARIANT_CONDITION.UNREACH
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.EXPR.PARENS.REDUNDANT
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.LOGIC.OPERAND.NOT_BOOL
+***** TODO MISRA.LOGIC.OPERATOR.NOT_BOOL
+***** TODO MISRA.NULL.STMT
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.STDLIB.WRONGNAME
+***** TODO UNREACH.GEN
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO asinhdp
+**** Klocwork Issues
+***** TODO MISRA.BITS.NOT_UNSIGNED
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.EXPR.PARENS.REDUNDANT
+***** TODO MISRA.FLOAT_EQUAL
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.LOGIC.OPERAND.NOT_BOOL
+***** TODO MISRA.LOGIC.OPERATOR.NOT_BOOL
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.STDLIB.WRONGNAME
+***** TODO MISRA.TOKEN.CPCOM
+**** Final Profile
+**** General Issues
+**** Doc
+*** DONE exp10sp
+:LOGBOOK:
+CLOCK: [2016-03-08 Tue 09:57]--[2016-03-08 Tue 10:03] =>  0:06
+CLOCK: [2016-03-07 Mon 10:20]--[2016-03-07 Mon 10:53] =>  0:33
+:END:      
+**** Klocwork Issues
+***** DONE MISRA.BITS.NOT_UNSIGNED
+Same fix as powsp.
+No change.
+****** TODO Move exp definition?
+***** WAITING MISRA.BUILTIN_NUMERIC
+***** DONE MISRA.CAST.FLOAT
+SAME ISSUE AS IN POWSP
+***** DONE MISRA.CAST.INT
+***** PHONE MISRA.CVALUE.IMPL.CAST
+Inline dropped to 60 cycles:
+- res = (float)dT * (1.0f + pol);
+***** DONE MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** DONE MISRA.EXPR.PARENS.INSUFFICIENT
+***** DONE MISRA.EXPR.PARENS.REDUNDANT
+***** DONE MISRA.FUNC.NOPROT.CALL
+***** HOLD MISRA.FUNC.NOPROT.DEF
+***** WAITING MISRA.ONEDEFRULE.FUNC
+***** PHONE MISRA.PPARAM.NEEDS.CONST
+ASM/C improved 8 CC's
+***** WAITING MISRA.PTR.ARITH
+***** DONE MISRA.RETURN.NOT_LAST
+:LOGBOOK:  
+CLOCK: [2016-03-08 Tue 09:52]--[2016-03-08 Tue 09:53] =>  0:01
+:END:      
+**** General Issues
+**** Doc
+*** TODO acosdp
+**** Klocwork Issues
+***** TODO INVARIANT_CONDITION.UNREACH
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.EXPR.PARENS.REDUNDANT
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.LOGIC.OPERAND.NOT_BOOL
+***** TODO MISRA.LOGIC.OPERATOR.NOT_BOOL
+***** TODO MISRA.NULL.STMT
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.STDLIB.WRONGNAME
+***** TODO UNREACH.GEN
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO tanhsp
+:LOGBOOK:  
+CLOCK: [2016-03-08 Tue 10:03]
+CLOCK: [2016-03-07 Mon 15:09]--[2016-03-07 Mon 16:27] =>  1:18
+CLOCK: [2016-03-07 Mon 11:21]--[2016-03-07 Mon 15:01] =>  3:40
+:END:      
+**** Klocwork Issues
+***** TODO MISRA.BITS.NOT_UNSIGNED
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.CAST.FLOAT
+***** TODO MISRA.CAST.INT
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FLOAT_EQUAL
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.IF.NO_ELSE
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO sinhsp
+**** Klocwork Issues
+***** TODO MISRA.BITS.NOT_UNSIGNED
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.CAST.FLOAT
+***** TODO MISRA.CAST.INT
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FLOAT_EQUAL
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.STDLIB.WRONGNAME
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO tanhdp
+**** Klocwork Issues
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.EXPR.PARENS.REDUNDANT
+***** TODO MISRA.FLOAT_EQUAL
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.IF.NO_ELSE
+***** TODO MISRA.LOGIC.OPERAND.NOT_BOOL
+***** TODO MISRA.LOGIC.OPERATOR.NOT_BOOL
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.STDLIB.WRONGNAME
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO atandp
+**** Klocwork Issues
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.EXPR.PARENS.REDUNDANT
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.LOGIC.OPERAND.NOT_BOOL
+***** TODO MISRA.LOGIC.OPERATOR.NOT_BOOL
+***** TODO MISRA.NULL.STMT
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.RETURN.NOT_LAST
+***** TODO MISRA.STDLIB.WRONGNAME
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO atansp
+**** Klocwork Issues
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FLOAT_EQUAL
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.INCL.INSIDE
+***** TODO MISRA.LOGIC.OPERAND.NOT_BOOL
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.RETURN.NOT_LAST
+***** TODO MISRA.ZERO_EQ.IMPLICIT
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO expsp
+**** Klocwork Issues
+***** TODO MISRA.BITS.NOT_UNSIGNED
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.CAST.FLOAT
+***** TODO MISRA.CAST.INT
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.EXPR.PARENS.REDUNDANT
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO atan2dp
+**** Klocwork Issues
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.EXPR.PARENS.REDUNDANT
+***** TODO MISRA.FLOAT_EQUAL
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.RETURN.NOT_LAST
+***** TODO MISRA.STDLIB.WRONGNAME
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO coshsp
+**** Klocwork Issues
+***** TODO MISRA.BITS.NOT_UNSIGNED
+***** TODO MISRA.CAST.FLOAT
+***** TODO MISRA.CAST.INT
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FLOAT_EQUAL
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.STDLIB.WRONGNAME
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO tandp
+**** Klocwork Issues
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.EXPR.PARENS.REDUNDANT
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.LOGIC.OPERAND.NOT_BOOL
+***** TODO MISRA.LOGIC.OPERATOR.NOT_BOOL
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.STDLIB.WRONGNAME
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO acoshdp
+**** Klocwork Issues
+***** TODO MISRA.BITS.NOT_UNSIGNED
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FLOAT_EQUAL
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.STDLIB.WRONGNAME
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO log2dp
+**** Klocwork Issues
+***** TODO MISRA.BITS.NOT_UNSIGNED
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.RETURN.NOT_LAST
+***** TODO MISRA.STDLIB.WRONGNAME
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO cosdp
+**** Klocwork Issues
+***** TODO MISRA.BITS.NOT_UNSIGNED
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.EXPR.PARENS.REDUNDANT
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.STDLIB.WRONGNAME
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO expdp
+**** Klocwork Issues
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.EXPR.PARENS.REDUNDANT
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.RETURN.NOT_LAST
+***** TODO MISRA.STDLIB.WRONGNAME
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO log10dp
+**** Klocwork Issues
+***** TODO MISRA.BITS.NOT_UNSIGNED
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.RETURN.NOT_LAST
+***** TODO MISRA.STDLIB.WRONGNAME
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO logdp
+**** Klocwork Issues
+***** TODO MISRA.BITS.NOT_UNSIGNED
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.RETURN.NOT_LAST
+***** TODO MISRA.STDLIB.WRONGNAME
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO coshdp
+**** Klocwork Issues
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.EXPR.PARENS.REDUNDANT
+***** TODO MISRA.FLOAT_EQUAL
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.STDLIB.WRONGNAME
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO cossp
+**** Klocwork Issues
+***** TODO MISRA.BITS.NOT_UNSIGNED
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.RETURN.NOT_LAST
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO exp2dp
+**** Klocwork Issues
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.EXPR.PARENS.REDUNDANT
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.RETURN.NOT_LAST
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO sinsp
+**** Klocwork Issues
+***** TODO MISRA.BITS.NOT_UNSIGNED
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FLOAT_EQUAL
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO divsp
+**** Klocwork Issues
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FLOAT_EQUAL
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.LOGIC.PRIMARY
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.STDLIB.WRONGNAME.UNDERSCORE
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO sinhdp
+**** Klocwork Issues
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.EXPR.PARENS.REDUNDANT
+***** TODO MISRA.FLOAT_EQUAL
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.STDLIB.WRONGNAME
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO asinhsp
+**** Klocwork Issues
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FLOAT_EQUAL
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.STDLIB.WRONGNAME
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO exp10dp
+**** Klocwork Issues
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.EXPR.PARENS.REDUNDANT
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.RETURN.NOT_LAST
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO tansp
+**** Klocwork Issues
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FLOAT_EQUAL
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO logsp
+**** Klocwork Issues
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.LITERAL.UNSIGNED.SUFFIX
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO log10sp
+**** Klocwork Issues
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.LITERAL.UNSIGNED.SUFFIX
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO acoshsp
+**** Klocwork Issues
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FLOAT_EQUAL
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.STDLIB.WRONGNAME
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO exp2sp
+**** Klocwork Issues
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.RETURN.NOT_LAST
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO sindp
+**** Klocwork Issues
+***** TODO MISRA.BITS.NOT_UNSIGNED
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.STDLIB.WRONGNAME
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO c6x
+**** Klocwork Issues
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.DEFINE.BADEXP
+***** TODO MISRA.DEFINE.FUNC
+***** TODO MISRA.DEFINE.NOPARS
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.FUNC.NO_PARAMS
+***** TODO MISRA.FUNC.UNNAMED.PARAMS
+***** TODO MISRA.INCGUARD
+***** TODO MISRA.STDLIB.WRONGNAME.UNDERSCORE
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO sqrtdp
+**** Klocwork Issues
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PRAGMA
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.STDLIB.WRONGNAME
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO divdp
+**** Klocwork Issues
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FLOAT_EQUAL
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+***** TODO MISRA.STDLIB.WRONGNAME.UNDERSCORE
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO log2sp
+**** Klocwork Issues
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.LITERAL.UNSIGNED.SUFFIX
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO rsqrtdp
+**** Klocwork Issues
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO sqrtsp
+**** Klocwork Issues
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PRAGMA
+***** TODO MISRA.PTR.ARITH
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO recipdp
+**** Klocwork Issues
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO recipsp
+**** Klocwork Issues
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO rsqrtsp
+**** Klocwork Issues
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.CVALUE.IMPL.CAST
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.FUNC.NOPROT.CALL
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+***** TODO MISRA.PPARAM.NEEDS.CONST
+***** TODO MISRA.PTR.ARITH
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO vect
+**** Klocwork Issues
+***** TODO MISRA.DEFINE.BADEXP
+***** TODO MISRA.DEFINE.FUNC
+***** TODO MISRA.DEFINE.NOPARS
+***** TODO MISRA.DEFINE.SHARP
+***** TODO MISRA.DEFINE.SHARP.MANY
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.STDLIB.WRONGNAME.UNDERSCORE
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO common
+**** Klocwork Issues
+***** TODO MISRA.DECL.ARRAY_SIZE
+***** TODO MISRA.DEFINE.FUNC
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+***** TODO MISRA.EXPR.PARENS.INSUFFICIENT
+***** TODO MISRA.FUNC.NOPROT.DEF
+***** TODO MISRA.ONEDEFRULE.FUNC
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO float
+**** Klocwork Issues
+***** TODO MISRA.DEFINE.BADEXP
+***** TODO MISRA.DEFINE.WRONGNAME
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO stdint
+**** Klocwork Issues
+***** TODO MISRA.DEFINE.BADEXP
+***** TODO MISRA.DEFINE.FUNC
+***** TODO MISRA.DEFINE.WRONGNAME.UNDERSCORE
+**** Final Profile
+**** General Issues
+**** Doc
+*** TODO tables
+**** Klocwork Issues
+***** TODO MISRA.BUILTIN_NUMERIC
+***** TODO MISRA.TOKEN.CPCOM
+**** Final Profile
+**** General Issues
+**** Doc
+
+** DONE kernel :: atan2sp
+:LOGBOOK:  
+CLOCK: [2016-02-25 Thu 15:43]--[2016-02-25 Thu 15:45] =>  0:02
+CLOCK: [2016-02-25 Thu 15:23]--[2016-02-25 Thu 15:26] =>  0:03
+:END:      
+*** NOTES
+As you can see from the 'Initial Data', atan2sp is tied for the most
+unique issues (16), and of them has the least total issues (40).
+
+!Tracking fixes in the status.xlsx spreadsheet!
+
+*** DONE Initial Build Data
+:LOGBOOK:  
+CLOCK: [2016-02-25 Thu 15:26]--[2016-02-25 Thu 15:43] =>  0:17
+:END:      
+**** Info
+CCS Project: atan2sp_66_BE_ELF
+CCS Version: 5.5.0.00055
+Compiler:    c6000_7.4.14
+
+**** Cycle Profile
+RTS:    115
+ASM:    113
+C:      113
+Inline: 86
+Vector: 24
+
+**** Memory Profile
+ASM:    0 B
+C:      1920 B
+Vector: 2464 B
+
+*** TODO Klocwork Issues
+:LOGBOOK:  
+CLOCK: [2016-02-26 Fri 14:02]--[2016-02-26 Fri 14:07] =>  0:05
+:END:      
+**** DONE Generate issues list
+:LOGBOOK:  
+CLOCK: [2016-02-25 Thu 15:45]--[2016-02-25 Thu 15:49] =>  0:04
+:END:      
+#+begin_src ipython :session :exports both
+d = kernel_info()
+l = kernel_list(d)
+
+for k in sorted(d[' atan2sp']['issues'].keys()): print "- [ ]",k
+    
+#+end_src
+
+#+RESULTS:
+
+**** NEXT Fix em [10/16]
+:LOGBOOK:  
+CLOCK: [2016-02-25 Thu 17:02]--[2016-02-25 Thu 17:32] =>  0:30
+CLOCK: [2016-02-25 Thu 16:41]--[2016-02-25 Thu 17:02] =>  0:21
+CLOCK: [2016-02-25 Thu 15:49]--[2016-02-25 Thu 16:38] =>  0:49
+:END:      
+!tracked in status.xlsx!
+
+Starting total: 128
+
+- [X] MISRA.BITS.NOT_UNSIGNED
+  129 - No change
+- [-] MISRA.CVALUE.IMPL.CAST [1/2]
+  - [X] (91,132,133) - 126 - No Change
+  - [ ] (53,88,146)  
+- [X] MISRA.EXPR.PARENS.INSUFFICIENT
+  124 - No change
+- [X] MISRA.EXPR.PARENS.REDUNDANT
+  121 - No change
+- [X] MISRA.PPARAM.NEEDS.CONST
+  119 - No change
+- [X] MISRA.PTR.ARITH
+  116 - No change
+- [X] MISRA.TOKEN.CPCOM
+  115 - No change
+- [X] MISRA.ZERO_EQ.IMPLICIT
+  114 - No change
+- [X] MISRA.LOGIC.OPERAND.NOT_BOOL
+  112 - No change
+- [ ] MISRA.LOGIC.OPERATOR.NOT_BOOL	*FAIL*
+  108 - FAILED
+- [-] MISRA.FUNC.NOPROT.CALL
+  - [X]  116 - No change
+  - [ ] (62, 145, 144)
+- [X] MISRA.FUNC.NOPROT.DEF
+  120 - 
+- [ ] MISRA.ONEDEFRULE.FUNC
+- [X] MISRA.FLOAT_EQUAL
+  - WAIVE
+- [ ] MISRA.RETURN.NOT_LAST
+- [ ] MISRA.DEFINE.WRONGNAME.UNDERSCORE
+
+**** DONE MISRA.ONEDEFRULE.FUNC
+:LOGBOOK:  
+CLOCK: [2016-02-29 Mon 14:57]--[2016-02-29 Mon 16:53] =>  1:56
+CLOCK: [2016-02-26 Fri 11:30]--[2016-02-26 Fri 13:48] =>  2:18
+CLOCK: [2016-02-26 Fri 11:16]--[2016-02-26 Fri 11:17] =>  0:01
+CLOCK: [2016-02-26 Fri 09:56]--[2016-02-26 Fri 11:12] =>  1:16
+:END: 
+***** NOTES
+- Attempting to put the inline definition inside of c file
+- Need to drop the 'static'
+- Attempting 'extern inline'
+- Linker issues...(see: **Build Script)
+
+SHOULD NOT HAVE DIFFICULTY WAIVING THIS
+
+***** FIX 1
+****** Description
+prototypes in _i.h
+
+- "divspMod_atan2spi" :: extern inline
+- "atan2f_sr1i_atan2spi" :: extern inline
+- "atan2sp_i" :: regular
+
+define all in _i.c
+
+****** Cycle Profile
+RTS:    101
+ASM:    100
+C:      100
+Inline: 99
+Vector: 97
+
+****** Memory Profile
+ASM:    0 B
+C:      0 B
+Vector: 112 B
+
+***** FIX 2
+Write a script to copy all functions into required source files before
+compilation.
+- John says is bad idea
+
+***** FIX 3
+
+**** DONE MISRA.FLOAT_EQUAL
+:LOGBOOK:  
+CLOCK: [2016-02-26 Fri 13:48]--[2016-02-26 Fri 14:02] =>  0:14
+:END:      
+:Waive:
+Function checks equivalence to zero to handle edge case. Should return
+exactly pi or zero (depending on value of y) in such a situation. This
+is acceptable as the function may be passed an exact value of zero.
+
+*** NEXT General Issues
+:LOGBOOK:  
+CLOCK: [2016-02-26 Fri 14:51]--[2016-02-26 Fri 15:16] =>  0:25
+:END:      
+**** atan2sp_i.h
+***** TODO 134 :: Value for Max (float) is hardcoded. Not portable?
+***** TODO bitwise -> boolean operations
+***** TODO swapping a/b :: define 2 subroutines to eliminate swapping?
+***** TODO edit script which automates include header #defines
+** DONE kernel :: common
+*** NOTES
+As the name implies, common is used by the other functions. So, might
+as well take it out early on.
+
+123 errors (mixed common and atan2sp)
+
+*** DONE Generate issues list
+:LOGBOOK:  
+CLOCK: [2016-02-25 Thu 15:45]--[2016-02-25 Thu 15:49] =>  0:04
+:END:      
+#+begin_src ipython :session :exports both
+d = kernel_info()
+l = kernel_list(d)
+
+for k in sorted(d[' common']['issues'].keys()): print "**** TODO ",k
+    
+#+end_src
+
+#+RESULTS:
+
+*** TODO Issues
+:LOGBOOK:  
+CLOCK: [2016-02-29 Mon 12:11]--[2016-02-29 Mon 13:20] =>  1:09
+CLOCK: [2016-02-29 Mon 09:48]--[2016-02-29 Mon 09:55] =>  0:07
+:END:      
+**** DONE MISRA.BUILTIN_NUMERIC
+Add typedefs to common.h, should propogate out to all kernels
+- Doesn't remove error.
+
+The error is "advisory" type, so it seems to be more of a warning. The
+website suggests typedef solution, so this should suffice for
+compliance. For portability, may use compiler flags to ensure safe bit-widths.
+
+**** HOLD MISRA.DECL.ARRAY_SIZE
+:LOGBOOK:  
+CLOCK: [2016-02-26 Fri 16:21]--[2016-02-26 Fri 16:22] =>  0:01
+CLOCK: [2016-02-26 Fri 14:29]--[2016-02-26 Fri 14:51] =>  0:22
+:END:      
+Define constants to describe table size.
+
+Changing to pointer (*) notation:
+RTS:     631 cycles
+ASM:     163 cycles
+C:       163 cycles
+Inline:  139 cycles
+Vector:  98 cycles
+**** DONE MISRA.DEFINE.FUNC
+Waived in VLIB
+**** DONE MISRA.DEFINE.WRONGNAME.UNDERSCORE
+**** DONE MISRA.EXPR.PARENS.INSUFFICIENT
+**** DONE MISRA.FUNC.NOPROT.DEF
+**** DONE MISRA.FUNC.NOPROT.CALL
+**** DONE MISRA.ONEDEFRULE.FUNC
+Can probably be waived.
+
+** DONE kernel :: powsp
+:LOGBOOK:
+CLOCK: [2016-03-03 Thu 09:45]--[2016-03-03 Thu 11:12] =>  1:27
+CLOCK: [2016-03-02 Wed 11:31]--[2016-03-02 Wed 15:00] =>  3:29
+:END:
+*** Klocwork Issues
+**** DONE MISRA.BITS.NOT_UNSIGNED
+**** WAITING MISRA.BUILTIN_NUMERIC
+**** HOLD MISRA.CAST.FLOAT
+**** DONE MISRA.CAST.INT
+**** DONE MISRA.CVALUE.IMPL.CAST
+**** DONE MISRA.DEFINE.WRONGNAME.UNDERSCORE
+**** DONE MISRA.EXPR.PARENS.INSUFFICIENT
+**** DONE MISRA.EXPR.PARENS.REDUNDANT
+**** WAITING MISRA.FLOAT_EQUAL
+All are checking certain bounds
+**** DONE MISRA.FUNC.NOPROT.CALL
+**** HOLD MISRA.FUNC.NOPROT.DEF
+**** DONE MISRA.LOGIC.OPERATOR.NOT_BOOL
+**** WAITING MISRA.ONEDEFRULE.FUNC
+**** DONE MISRA.PPARAM.NEEDS.CONST
+**** WAITING MISRA.PTR.ARITH
+**** DONE MISRA.ZERO_EQ.IMPLICIT
+
+prototype
+parens
+x.xf
+-dropped to 45
+
+prototype
+- no change
+
+parens
+- nada
+
+x.xf
+- inline=136
+
+pol  = (c5*r2) + ((c4*r3) + (((c2*r1) + c3) + (c1*r2))*r4);
+pol  = (c5*r2) + (c4*r3) + (((c2*r1) + c3 + (c1*r2))*r4);
+ - inline dropped 3 CC's AFTER x.xf fix, gained 3 BEFORE x.xf fix
+
+u's
+- nada
+
+&&
+- +1 CC
+
+%2
+- nada
+
+Down to 134 cycles...built with script...134/48
+
+*** Final Profile
+**** Cycle Profile
+RTS:     631 cycles
+ASM:     148 cycles
+C:       152 cycles
+Inline:  134 cycles
+Vector:  48 cycles
+**** Memory Profil
+ASM:     32 bytes
+C:       1248 bytes
+Vector:  3296 bytes
+*** General Issues
+**** powsp_i.h
+***** expspMod_powspi()
+- why use _extu, when could just just do "N & 0xC"?
+***** powsp_i()
+- Signedness does not seem to be correct. The algorithm checks for
+  negative base w/ odd-integer power. Negative if so.
+- If base is negative, and power is not an integer, returns NaN
+- Either way, combine these two checks to save cycles.
+- Cast things to int/float? Or use _ftoi and _itof?
+*** Doc
+Integers used as booleans keeps causing confusion
+** NOTES
+After atan2sp and common "good" fixes, 116 issues
+remain. (atan2sp_common_issues.txt)
+
+*** TODO Remove redundant code
+** TODO Build Script
+:LOGBOOK:  
+CLOCK: [2016-02-29 Mon 13:20]--[2016-02-29 Mon 13:21] =>  0:01
+CLOCK: [2016-02-26 Fri 15:16]--[2016-02-26 Fri 15:20] =>  0:04
+:END:      
+*** DONE Building only one kernel
+:LOGBOOK:  
+CLOCK: [2016-02-26 Fri 16:22]--[2016-02-26 Fri 16:32] =>  0:10
+CLOCK: [2016-02-26 Fri 15:20]--[2016-02-26 Fri 16:21] =>  1:01
+:END:      
+Edit package.bld
+
+*** CANCELLED Externalizing inline functions                    :CANCELLED:
+:LOGBOOK:  
+CLOCK: [2016-02-29 Mon 13:21]--[2016-02-29 Mon 13:33] =>  0:12
+:END:      
+The library definition of inline functions doesn't link properly.
+- "atan2sp_i was referenced but not defined"
+
+**** DONE Switch order of libc
+:LOGBOOK:  
+CLOCK: [2016-02-29 Mon 13:33]--[2016-02-29 Mon 14:54] =>  1:21
+:END:      
+tables.c is successfully compiled (added to libc first)
+atan2sp.c fails (added to libc second)
+- atan2sp_i.c should be compiled first.
+
+push() files normally
+unshift() any _i files
+unshift() tables.c
+
+NOPE. turns out that isn't how the compiler works. Inline stuff only
+works in the declaration file, it isn't a linker-time issue.
+
+*** TODO Clean up package.bld
+there are a bunch of if-statements that take up a bunch of space and
+start to confuse things.
+* Log
+** [2016-02-23 Tue] 
+Rebuilding for C66 ONLY. See kw project: mathlib_misra
+
+** [2016-02-24 Wed]
+- atan2sp_v.c fixes migrated to git
+- atan2sp_i.h fixes migrated to git
+- atan2sp_d.c fixes migrated to git
+
+*** TODO C standard libraries are flagged as issues. Waive all in stdlibs?
+
+** [2016-02-25 Thu]
+
+* TEST
+

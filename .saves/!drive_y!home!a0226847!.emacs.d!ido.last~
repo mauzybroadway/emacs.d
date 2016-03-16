@@ -1,0 +1,36 @@
+;;; -*- coding: utf-8 -*-
+
+;; ----- ido-last-directory-list -----
+(
+ ("/cygdrive/w/" . "MATHLIB 3.1.2/")
+ ("/cygdrive/" . "w/")
+ ("/" . "cygdrive/")
+)
+
+;; ----- ido-work-directory-list -----
+(
+ "/cygdrive/w/MATHLIB 3.1.2/"
+)
+
+;; ----- ido-work-file-list -----
+(
+ "worklog.org"
+)
+
+;; ----- ido-dir-file-cache -----
+(
+ ("/cygdrive/w/MATHLIB 3.1.2/" (22240 14668 935467 200000) "worklog.org" "Waivers.pptx" "status.xlsx" "MATHLIB_3.1.2_SRAS_Manifest.txt" "../" "./")
+
+ ("/cygdrive/w/" (22239 21751 544940 600000) "../" "./" "System Volume Information/" "MATHLIB 3.1.2/" "$RECYCLE.BIN/")
+
+ ("/cygdrive/" (22240 15474 0 0) "../" "./" "z/" "y/" "x/" "w/" "n/" "c/")
+
+ ("/cygdrive/c/" (22239 21778 446630 500000) "../" "./" "Windows/" "VC_RED.MSI" "VC_RED.cab" "vcredist.bmp" "Users/" "Userdata/" "tmp/" "ti/" "Temp/" "System Volume Information/" "Recovery/" "ProgramData/" "Program Files (x86)/" "Program Files/" "PerfLogs/" "pagefile.sys" "MSOCache/" "MATHLIB_Tools/" "MATHLIB_Install/" "mathlib_3.2.0/" "Intel/" "install.res.3082.dll" "install.res.2052.dll" "install.res.1042.dll" "install.res.1041.dll" "install.res.1040.dll" "install.res.1036.dll" "install.res.1033.dll" "install.res.1031.dll" "install.res.1028.dll" "install.ini" "install.exe" "hiberfil.sys" "globdata.ini" "eula.3082.txt" "eula.2052.txt" "eula.1042.txt" "eula.1041.txt" "eula.1040.txt" "eula.1036.txt" "eula.1033.txt" "eula.1031.txt" "eula.1028.txt" "Documents and Settings/" "bootmgr" "Boot/" "artifacts.tgz" ".bash_history" "$Recycle.Bin/")
+
+ ("/home/" (22239 5141 228954 100000) "a0226847/" "../" "./")
+
+ ("/home/a0226847/" (22239 19142 729002 400000) ".profile" ".ipython/" ".inputrc" ".emacs.d/" ".emacs" ".cache/" ".bash_profile" ".bash_history" ".bashrc" "../" "./")
+)
+
+;; ----- ido-unc-hosts-cache -----
+t

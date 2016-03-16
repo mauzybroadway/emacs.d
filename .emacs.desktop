@@ -1,0 +1,127 @@
+;; -*- mode: emacs-lisp; coding: emacs-mule; -*-
+;; --------------------------------------------------------------------------
+;; Desktop File for Emacs
+;; --------------------------------------------------------------------------
+;; Created Wed Mar 16 10:22:31 2016
+;; Desktop file format version 208
+;; Emacs version 25.0.92.1
+
+;; Global section:
+(setq desktop-saved-frameset [frameset 1 (22249 27687 501691 500000) (desktop . "208") "a0226847@GTDA0226847" nil nil ((((font-backend uniscribe gdi) (font . "-outline-Courier New-normal-normal-normal-mono-13-*-*-*-c-*-iso8859-1") (border-width . 2) (internal-border-width . 0) (right-divider-width . 0) (bottom-divider-width . 0) (vertical-scroll-bars) (horizontal-scroll-bars) (foreground-color . "#DCDCCC") (background-color . "#3F3F3F") (mouse-color . "black") (border-color . "black") (screen-gamma) (line-spacing) (left-fringe . 8) (right-fringe . 8) (alpha) (menu-bar-lines . 1) (tool-bar-lines . 0) (height . 63) (title) (icon-type) (auto-raise) (auto-lower) (cursor-type . box) (scroll-bar-width . 0) (scroll-bar-height . 0) (fullscreen) (display-type . color) (background-mode . dark) (cursor-color . "#FFFFEF") (environment) (frameset--id . "A478-10CB-9E6F-E242") (frameset--mini t . t) (modeline . t) (minibuffer . t) (unsplittable) (icon-name) (visibility . t) (display . "w32") (explicit-name) (tool-bar-position . top) (width . 208) (left . 1912) (top . 22)) ((min-height . 4) (min-width . 20) (min-height-ignore . 2) (min-width-ignore . 8) (min-height-safe . 1) (min-width-safe . 4) (min-pixel-height . 64) (min-pixel-width . 160) (min-pixel-height-ignore . 32) (min-pixel-width-ignore . 64) (min-pixel-height-safe . 16) (min-pixel-width-safe . 32)) hc (pixel-width . 1680) (pixel-height . 992) (total-width . 210) (total-height . 62) (normal-height . 1.0) (normal-width . 1.0) (combination-limit) (leaf (pixel-width . 840) (pixel-height . 992) (total-width . 105) (total-height . 62) (normal-height . 1.0) (normal-width . 0.5) (buffer "*shell*" (selected . t) (hscroll . 0) (fringes 8 8 nil) (margins nil) (scroll-bars nil 0 t nil 0 t) (vscroll . 0) (dedicated) (point . 155) (start . 1))) (leaf (last . t) (pixel-width . 840) (pixel-height . 992) (total-width . 105) (total-height . 62) (normal-height . 1.0) (normal-width . 0.5) (buffer "atanhdp_i.h" (selected) (hscroll . 0) (fringes 8 8 nil) (margins nil) (scroll-bars nil 0 t nil 0 t) (vscroll . 0) (dedicated) (point . 4492) (start . 2889)))))])
+(setq desktop-missing-file-warning nil)
+(setq tags-file-name nil)
+(setq tags-table-list nil)
+(setq search-ring '("doub" "def" "rest" "doub" "def" "dif" "def" "cmn" "def" "doub" "dif" "def" "cmn" "dif" "def" "dif"))
+(setq regexp-search-ring '("org/"))
+(setq register-alist nil)
+(setq file-name-history '("x:/mathlib_3.1.2/mathlib/ti/mathlib/src/atanhdp/c66/atanhdp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/exp10dp/exp10dp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/exp10dp/exp10dp_v.c" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/exp10dp/c66/exp10dp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/exp10dp/c66/exp10dp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/divsp/c66/divsp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/exp2dp/exp2dp_v.c" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/exp2dp/exp2dp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/exp2dp/c66/exp2dp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/exp2dp/c66/exp2dp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/logdp/logdp_v.c" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/logdp/logdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/logdp/c66/logdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/logdp/c66/logdp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/log10dp/log10dp_v.c" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/log10dp/log10dp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/log10dp/c66/log10dp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/atan2sp/c66/atan2sp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/atansp/c66/atansp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/log10dp/c66/log10dp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/expdp/expdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/expdp/expdp_v.c" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/expdp/c66/expdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/expdp/c66/expdp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/log2dp/log2dp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/log2dp/log2dp_v.c" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/log2dp/c66/log2dp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/log2dp/c66/log2dp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/atan2dp/atan2dp_v.c" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/atan2dp/atan2dp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/atan2dp/c66/atan2dp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/atan2dp/c66/atan2dp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/atansp/atansp_v.c" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/atandp/atandp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/atansp/atansp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/atansp/c66/atansp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/common/c66/common.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/atandp/c66/atandp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/atandp/c66/atandp_v.c" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/atandp/c66/atandp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/tanhdp/c66/tanhdp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/powdp/powdp_v.c" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/powdp/powdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/powdp/c66/powdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/asinhdp/c66/asinhdp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/powdp/c66/powdp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/exp2sp/exp2sp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/exp2sp/exp2sp_v.c" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/exp2sp/c66/exp2sp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/artifacts/logs/build_C66_src.log" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/cosdp/c66/cosdp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/exp2sp/c66/exp2sp_i.h" "x:/mathlib_3.1.1_CLEAN/mathlib/ti/mathlib/src/common/c66/common.h" "x:/mathlib_3.1.1_CLEAN/mathlib/ti/mathlib/src/common/common.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/common/common.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/recipdp/recipdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/recipdp/recipdp_v.c" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/recipdp/c66/recipdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/recipdp/c66/recipdp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/rsqrtdp/rsqrtdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/rsqrtdp/rsqrtdp_v.c" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/rsqrtdp/c66/rsqrtdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/rsqrtdp/c66/rsqrtdp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/divdp/divdp_v.c" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/divdp/divdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/divdp/c66/divdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/divdp/c66/divdp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/sqrtdp/sqrtdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/sqrtdp/sqrtdp_v.c" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/sqrtdp/c66/sqrtdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/sqrtsp/c66/sqrtsp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/sqrtdp/c66/sqrtdp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/sindp/sindp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/sindp/sindp_v.c" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/sindp/c66/sindp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/sindp/c66/sindp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/sinhdp/sinhdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/sinhdp/c66/sinhdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/coshdp/c66/coshdp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/sinhdp/c66/sinhdp_v.c" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/sinhdp/c66/sinhdp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/coshdp/c66/coshdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/coshdp/coshdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/tandp/c66/tandp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/coshdp/c66/coshdp_v.c" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/cosdp/c66/cosdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/cosdp/cosdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/cossp/c66/cossp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/cosdp/cosdp_v.c" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/acoshdp/acoshdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/acoshdp/c66/acoshdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/acoshsp/c66/acoshsp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/acoshdp/c66/acoshdp_i.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/acoshdp/acoshdp_v.c" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/tandp/c66/tandp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/tandp/tandp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/tandp/tandp_v.c" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/tanhdp/c66/tanhdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/tanhdp/tanhdp.h" "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/tanhdp/c66/tanhdp_v.c"))
+
+;; Buffer section -- buffers listed in same order as in buffer list:
+(desktop-create-buffer 208
+  "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/atanhdp/c66/atanhdp_i.h"
+  "atanhdp_i.h"
+  'c-mode
+  '(abbrev-mode helm-mode)
+  4492
+  '(4492 nil)
+  nil
+  nil
+  '((buffer-file-coding-system . undecided-dos))
+  '((mark-ring nil)))
+
+(desktop-create-buffer 208
+  "w:/MATHLIB 3.1.2/worklog.org"
+  "worklog.org"
+  'org-mode
+  '(auto-fill-mode helm-mode org-indent-mode)
+  17234
+  '(14956 nil)
+  nil
+  nil
+  '((indent-tabs-mode) (buffer-file-coding-system . undecided-dos) (overwrite-mode) (truncate-lines . t))
+  '((mark-ring (41909 25573 17936 17266 25493 25450 25450 24558 18587 18581 41913 10042 8942 8942 17250 17234))))
+
+(desktop-create-buffer 208
+  "x:/mathlib_3.1.2/mathlib/ti/mathlib/package.bld"
+  "package.bld"
+  'js-mode
+  '(helm-mode)
+  4310
+  '(4314 nil)
+  nil
+  nil
+  '((buffer-file-coding-system . undecided-dos))
+  '((mark-ring (4510 4375 4886 4299 4774 4514 4319 4933 4410 5013 4774 4510 4514 4828 5013 4411))))
+
+(desktop-create-buffer 208
+  "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/atanhdp/sr"
+  "sr"
+  'fundamental-mode
+  '(helm-mode)
+  1
+  '(nil nil)
+  nil
+  nil
+  nil
+  '((mark-ring nil)))
+
+(desktop-create-buffer 208
+  "x:/mathlib_3.1.2/mathlib/ti/mathlib/src/asinhdp/c66/asinhdp_i.h"
+  "asinhdp_i.h"
+  'c-mode
+  '(abbrev-mode helm-mode)
+  3147
+  '(5519 nil)
+  nil
+  nil
+  '((buffer-file-coding-system . undecided-dos))
+  '((mark-ring (4045 3568 3147))))
+
+(desktop-create-buffer 208
+  "x:/mathlib_3.1.2/mathlib/ti/mathlib/artifacts/logs/build_C66_src.log"
+  "build_C66_src.log"
+  'fundamental-mode
+  '(helm-mode)
+  2849
+  '(2849 nil)
+  nil
+  nil
+  '((buffer-file-coding-system . undecided-unix))
+  '((mark-ring nil)))
+
+(desktop-create-buffer 208
+  "x:/mathlib_3.1.1_CLEAN/mathlib/ti/mathlib/src/common/c66/common.h"
+  "common.h"
+  'c-mode
+  '(abbrev-mode helm-mode)
+  3371
+  '(6072 nil)
+  nil
+  nil
+  '((buffer-file-coding-system . undecided-unix))
+  '((mark-ring (1 3371))))
+
+(desktop-create-buffer 208
+  "x:/mathlib_3.1.1_CLEAN/mathlib/ti/mathlib/src/common/common.h"
+  "common.h"
+  'c-mode
+  '(abbrev-mode helm-mode)
+  3615
+  '(1 nil)
+  nil
+  nil
+  '((buffer-file-coding-system . undecided-unix))
+  '((mark-ring nil)))
+
+(desktop-create-buffer 208
+  "y:/home/a0226847/.emacs"
+  ".emacs"
+  'emacs-lisp-mode
+  '(helm-mode)
+  1277
+  '(2243 nil)
+  nil
+  nil
+  '((buffer-file-coding-system . undecided-dos))
+  '((mark-ring (2006 1277))))
+

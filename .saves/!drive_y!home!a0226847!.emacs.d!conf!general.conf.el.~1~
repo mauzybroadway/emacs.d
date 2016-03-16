@@ -1,0 +1,55 @@
+;;;;;                           ;;
+;;;;  General Configuration    ;;;
+;;;           - mauzybwy -    ;;;;
+;;                           ;;;;;
+
+;;;;
+;;; Themes
+;;
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
+(load-theme 'zenburn t)
+
+;;;;
+;;; Save sessions
+;;
+(desktop-save-mode 1)
+
+;;;;
+;;; Keybindings
+;;
+(global-set-key (kbd "M-RET e b") 'eval-buffer)
+
+;;;;
+;;; Functions
+;;
+
+(defun my-load-all-in-directory (dir)
+  "`load' all elisp libraries in directory DIR which are not already loaded."
+  (interactive "D")
+  (let ((libraries-loaded (mapcar #'file-name-sans-extension
+                                  (delq nil (mapcar #'car load-history)))))
+    (dolist (file (directory-files dir t ".+\\.elc?$"))
+      (let ((library (file-name-sans-extension file)))
+        (unless (member library libraries-loaded)
+          (load library nil t)
+          (push library libraries-loaded))))))
+
+;;;;
+;;;  Backups
+;;
+
+(setq backup-directory-alist `(("." . "~/.saves")))
+
+(setq delete-old-versions t
+  kept-new-versions 6
+  kept-old-versions 2
+  version-control t)
+
+;;;;
+;;;  Scrolling
+;;
+
+(setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
+(setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
+(setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
+(setq scroll-step 1) ;; keyboard scroll one line at a time

@@ -1,0 +1,3 @@
+;; org-persist.el - GTLA0226847 at <2016-03-03 Thu 16:22>
+(setq resume-clock '("c:/Users/a0226847/Documents/mathlib 3.2.0/worklog.org" . 13751))
+(setq stored-clock-history '(("c:/Users/a0226847/Documents/twerklog.org" . 12043) ("c:/Users/a0226847/Documents/twerklog.org" . 12057) ("c:/Users/a0226847/Documents/mathlib 3.2.0/worklog.org" . 21839) ("c:/Users/a0226847/Documents/mathlib 3.2.0/worklog.org" . 13670)))

@@ -1,0 +1,26 @@
+
+* 2016
+** 2016-02 February
+*** 2016-02-25 Thursday
+**** 
+:LOGBOOK:  
+CLOCK: [2016-02-25 Thu 13:47]--[2016-02-25 Thu 13:57] =>  0:10
+:END:      
+[2016-02-25 Thu 13:47]
+**** Test journal. Getting tea/ramen 
+:LOGBOOK:  
+CLOCK: [2016-02-25 Thu 14:06]--[2016-02-25 Thu 14:15] =>  0:09
+:END:      
+[2016-02-25 Thu 14:06]
+**** Lasagna
+:LOGBOOK:  
+CLOCK: [2016-02-25 Thu 16:38]--[2016-02-25 Thu 16:41] =>  0:03
+:END:      
+[2016-02-25 Thu 16:38]
+*** 2016-02-26 Friday
+**** Reorganization
+:LOGBOOK:  
+CLOCK: [2016-02-26 Fri 11:12]--[2016-02-26 Fri 11:16] =>  0:04
+:END:      
+[2016-02-26 Fri 11:12]
+Fixing up TODO highlight colors

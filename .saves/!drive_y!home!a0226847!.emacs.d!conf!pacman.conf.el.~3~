@@ -1,0 +1,31 @@
+;;;;;                           ;;
+;;;;  Package Configuration    ;;;
+;;;           - mauzybwy -    ;;;;
+;;                           ;;;;;
+
+;;(setq url-proxy-services '(("no_proxy" . "ti\\.com")
+;;                           ("http" . "webproxy.ext.ti.com:80")
+;;			   ("https" . "webproxy.ext.ti.com:80")))
+
+(defun enable-proxy ()
+  (setq url-proxy-services '(("no_proxy" . "ti\\.com")
+			     ("http" . "webproxy.ext.ti.com:80")
+			     ("https" . "webproxy.ext.ti.com:80"))))
+
+
+(defun disable-proxy ()
+  (setq url-proxy-services '(("no_proxy" . "")
+			     ("http" . "")
+			     ("https" . ""))))
+
+(require 'package)
+
+;; MELPA
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.org/packages/"))
+(when (< emacs-major-version 24)
+  ;; For important compatibility libraries like cl-lib
+  (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/")))
+
+
+(package-initialize) ;; You might already have this line
